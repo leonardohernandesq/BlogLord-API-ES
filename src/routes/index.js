@@ -12,7 +12,7 @@ const router = express.Router();
 router.get("/users/all", authMiddleware, UserController.getAll);
 router.get("/users/:id", authMiddleware, UserController.getById);
 
-router.post("/users/register", authMiddleware, UserController.create);
+router.post("/users/register", UserController.create);
 router.post("/users/login", UserController.login);
 
 router.put("/users/:id", authMiddleware, UserController.update);
@@ -39,7 +39,7 @@ router.post(
   "/posts/create",
   authMiddleware,
   upload.single("image"),
-  PostController.create
+  PostController.create,
 );
 router.post("/posts/addview/:id", PostController.addView);
 
@@ -47,7 +47,7 @@ router.put(
   "/posts/:id",
   authMiddleware,
   upload.single("image"),
-  PostController.update
+  PostController.update,
 );
 
 router.delete("/posts/:id", authMiddleware, PostController.delete);
