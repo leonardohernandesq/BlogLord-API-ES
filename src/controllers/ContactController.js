@@ -4,9 +4,10 @@ const nodemailer = require("nodemailer");
 const ContactController = {
   send: async (req, res) => {
     const { name, phone, email, message, recaptchaToken } = req.body;
+    let transporter;
 
     try {
-      const transporter = nodemailer.createTransport({
+      transporter = nodemailer.createTransport({
         host: "smtp.titan.email",
         port: 587,
         secure: false,
@@ -14,28 +15,43 @@ const ContactController = {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
         },
+        logger: true,
+        debug: true,
       });
 
+      // 🔥 TESTA CONEXÃO SMTP AQUI
+      await transporter.verify();
+      console.log("✅ SMTP conectado com sucesso");
+    } catch (smtpError) {
+      console.error("❌ Erro na conexão SMTP:", smtpError);
+
+      return res.status(500).json({
+        success: false,
+        message: "Erro na conexão com o servidor de email.",
+      });
+    }
+
+    try {
       // 1. Validar reCAPTCHA token
-      // if (!recaptchaToken) {
-      //   return res.status(400).json({
-      //     success: false,
-      //     message: "Token do reCAPTCHA ausente.",
-      //   });
-      // }
+      if (!recaptchaToken) {
+        return res.status(400).json({
+          success: false,
+          message: "Token do reCAPTCHA ausente.",
+        });
+      }
 
-      // const recaptchaResponse = await axios.post(
-      //   `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${recaptchaToken}`,
-      // );
+      const recaptchaResponse = await axios.post(
+        `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${recaptchaToken}`,
+      );
 
-      // const { success } = recaptchaResponse.data;
+      const { success, score, action } = recaptchaResponse.data;
 
-      // if (!success) {
-      //   return res.status(400).json({
-      //     success: false,
-      //     message: "Falha na verificação do reCAPTCHA.",
-      //   });
-      // }
+      if (!success) {
+        return res.status(400).json({
+          success: false,
+          message: "Falha na verificação do reCAPTCHA.",
+        });
+      }
 
       // 2. Validação dos campos
       if (!phone) {
