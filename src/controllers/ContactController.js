@@ -1,10 +1,8 @@
-const { Resend } = require("resend");
 const axios = require("axios");
 const nodemailer = require("nodemailer");
 
 const ContactController = {
   send: async (req, res) => {
-    const resend = new Resend(process.env.RESEND);
     const { name, phone, email, message, recaptchaToken } = req.body;
 
     try {
@@ -58,13 +56,11 @@ const ContactController = {
           .json({ success: false, message: "Mensagem é obrigatória" });
       }
 
-      // 3. Enviar email via Resend
       const result = await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: process.env.EMAIL_USER,
-        reply_to: email,
         subject: "Sitio de presupuesto del Lord System",
-        html: `
+        text: `
           <p><strong>Nombre:</strong> ${name}</p>
           <p><strong>Correo electrónico:</strong> ${email}</p>
           <p><strong>Teléfono:</strong> ${phone}</p>
