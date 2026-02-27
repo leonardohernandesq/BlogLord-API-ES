@@ -4,9 +4,6 @@ const nodemailer = require("nodemailer");
 const ContactController = {
   send: async (req, res) => {
     const { name, phone, email, message, recaptchaToken } = req.body;
-    console.log("---------------------");
-    console.log(name, phone, email, message, recaptchaToken);
-    console.log("---------------------");
 
     try {
       const transporter = nodemailer.createTransport({
@@ -19,10 +16,6 @@ const ContactController = {
         },
       });
 
-      console.log("---------------------");
-      console.log("transporter", transporter);
-      console.log("---------------------");
-
       // 1. Validar reCAPTCHA token
       if (!recaptchaToken) {
         return res.status(400).json({
@@ -30,10 +23,6 @@ const ContactController = {
           message: "Token do reCAPTCHA ausente.",
         });
       }
-
-      console.log("---------------------");
-      console.log("recaptchaToken", recaptchaToken);
-      console.log("---------------------");
 
       const recaptchaResponse = await axios.post(
         `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${recaptchaToken}`,
@@ -47,10 +36,6 @@ const ContactController = {
           message: "Falha na verificação do reCAPTCHA.",
         });
       }
-
-      console.log("---------------------");
-      console.log("success", success);
-      console.log("---------------------");
 
       // 2. Validação dos campos
       if (!phone) {
@@ -83,10 +68,6 @@ const ContactController = {
           <p>${message}</p>
         `,
       });
-
-      console.log("---------------------");
-      console.log("success", result);
-      console.log("---------------------");
 
       return res.status(200).json({ success: true, result });
     } catch (error) {
