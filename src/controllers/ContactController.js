@@ -1,12 +1,22 @@
 const { Resend } = require("resend");
 const axios = require("axios");
+const nodemailer = require("nodemailer");
 
 const ContactController = {
   send: async (req, res) => {
     const resend = new Resend(process.env.RESEND);
+    const { name, phone, email, message, recaptchaToken } = req.body;
 
     try {
-      const { name, phone, email, message, recaptchaToken } = req.body;
+      const transporter = nodemailer.createTransport({
+        host: "smtp.titan.email",
+        port: 587,
+        secure: false,
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
 
       // 1. Validar reCAPTCHA token
       if (!recaptchaToken) {
@@ -17,7 +27,7 @@ const ContactController = {
       }
 
       const recaptchaResponse = await axios.post(
-        `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${recaptchaToken}`
+        `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${recaptchaToken}`,
       );
 
       const { success, score, action } = recaptchaResponse.data;
@@ -49,17 +59,16 @@ const ContactController = {
       }
 
       // 3. Enviar email via Resend
-      const result = await resend.emails.send({
-        from: `Lord System <onboarding@resend.dev>`,
-        to: "leonardo_hernandes@outlook.com.br",
-        cc: "henriquepacotee@gmail.com",
+      const result = await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: process.env.EMAIL_USER,
         reply_to: email,
-        subject: "Orçamento do site da Lord System",
+        subject: "Sitio de presupuesto del Lord System",
         html: `
-          <p><strong>Nome:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Telefone:</strong> ${phone}</p>
-          <p><strong>Mensagem:</strong></p>
+          <p><strong>Nombre:</strong> ${name}</p>
+          <p><strong>Correo electrónico:</strong> ${email}</p>
+          <p><strong>Teléfono:</strong> ${phone}</p>
+          <p><strong>Mensaje:</strong></p>
           <p>${message}</p>
         `,
       });
