@@ -17,25 +17,25 @@ const ContactController = {
       });
 
       // 1. Validar reCAPTCHA token
-      if (!recaptchaToken) {
-        return res.status(400).json({
-          success: false,
-          message: "Token do reCAPTCHA ausente.",
-        });
-      }
+      // if (!recaptchaToken) {
+      //   return res.status(400).json({
+      //     success: false,
+      //     message: "Token do reCAPTCHA ausente.",
+      //   });
+      // }
 
-      const recaptchaResponse = await axios.post(
-        `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${recaptchaToken}`,
-      );
+      // const recaptchaResponse = await axios.post(
+      //   `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${recaptchaToken}`,
+      // );
 
-      const { success } = recaptchaResponse.data;
+      // const { success } = recaptchaResponse.data;
 
-      if (!success) {
-        return res.status(400).json({
-          success: false,
-          message: "Falha na verificação do reCAPTCHA.",
-        });
-      }
+      // if (!success) {
+      //   return res.status(400).json({
+      //     success: false,
+      //     message: "Falha na verificação do reCAPTCHA.",
+      //   });
+      // }
 
       // 2. Validação dos campos
       if (!phone) {
@@ -60,7 +60,7 @@ const ContactController = {
         from: process.env.EMAIL_USER,
         to: process.env.EMAIL_USER,
         subject: "Sitio de presupuesto del Lord System",
-        text: `
+        html: `
           <p><strong>Nombre:</strong> ${name}</p>
           <p><strong>Correo electrónico:</strong> ${email}</p>
           <p><strong>Teléfono:</strong> ${phone}</p>
